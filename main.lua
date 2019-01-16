@@ -66,7 +66,7 @@ function love.draw()
 end
 
 function initializeDictionary()
-    for line in love.filesystem.lines('large') do
+    for line in love.filesystem.lines('large.txt') do
         table.insert(words, line) 
     end
 end
