@@ -10,9 +10,12 @@ Timer = require 'lib/knife.timer'
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
+ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+
 local font = love.graphics.newFont('fonts/font.ttf', 64)
 
 local currentTime = 60
+local currentCharIndex = 1
 local score = 0
 
 local words = {}
@@ -28,15 +31,39 @@ function love.load()
         currentTime = currentTime - 1
     end)
 
+    math.randomseed(os.time())
+
     initializeDictionary()
     chooseWord()
-    
-    math.randomseed(os.time())
 end
 
 function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
+    end
+
+    for i = 1, #ALPHABET do
+        local char = ALPHABET:sub(i, i)
+
+        -- if we have pressed this key of the alphabet...
+        if key == char then
+
+            -- if we have typed the current correct letter...
+            if char == fullString:sub(currentCharIndex, currentCharIndex) then
+
+                -- successfully typed full word
+                if currentCharIndex == fullString:len() then
+                    score = score + fullString:len()
+                    chooseWord()
+                else
+                    currentCharIndex = currentCharIndex + 1
+                end
+            else
+
+                -- else if we typed the wrong letter...
+                currentCharIndex = 1
+            end
+        end
     end
 end
 
@@ -52,6 +79,7 @@ function love.draw()
     love.graphics.setColor(1, 1, 1, 1)
 
     -- draw the progress of the word we're typing in white
+    local halfString = currentCharIndex == 1 and '' or fullString:sub(1, currentCharIndex - 1)
     love.graphics.printf(halfString, 0, WINDOW_HEIGHT / 2 + 16, 
         WINDOW_WIDTH - font:getWidth(fullString:sub(halfString:len() + 1, fullString:len())), 'center')
 
@@ -72,6 +100,6 @@ function initializeDictionary()
 end
 
 function chooseWord()
+    currentCharIndex = 1
     fullString = words[math.random(#words)]
-    halfString = fullString:sub(1, #fullString - 1)
 end
